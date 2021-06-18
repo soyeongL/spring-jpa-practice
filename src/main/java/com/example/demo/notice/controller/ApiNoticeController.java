@@ -26,12 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.entity.Notice;
 import com.example.demo.notice.exception.AlreadyDeletedException;
+import com.example.demo.notice.exception.DuplicatedNoticeException;
 import com.example.demo.notice.exception.NoticeNotFoundException;
 import com.example.demo.notice.model.NoticeDeleteInput;
 import com.example.demo.notice.model.NoticeInput;
 import com.example.demo.notice.model.NoticeModel;
 import com.example.demo.notice.model.ResponseError;
-import com.example.demo.repository.NoticeRepository;
+import com.example.demo.notice.repository.NoticeRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -137,6 +138,7 @@ public class ApiNoticeController {
 		return notice;
 	}
 	*/
+	/*
 	@PostMapping("/api/notice")
 	public ResponseEntity<Object> addNotice(@RequestBody @Valid NoticeInput noticeInput
 			, Errors errors) {
@@ -157,6 +159,33 @@ public class ApiNoticeController {
 		noticeRepository.save(notice);
 		return ResponseEntity.ok().build();
 	}
+	
+	*/
+	
+	@PostMapping("/api/notice")
+	public void addNotice(@RequestBody NoticeInput noticeInput) {
+
+		LocalDateTime checkDate = LocalDateTime.now().minusMinutes(1);
+		
+		int noticeCount=   noticeRepository.countByTitleAndContentsAndRegDateIsGreaterThanEqual(noticeInput.getTitle(), noticeInput.getContents(), checkDate);
+		
+		if(noticeCount>0) {
+			throw new DuplicatedNoticeException("1분 이내에 동일한 공지사항이 존재합니다.");
+		}
+		
+		noticeRepository.save(Notice.builder()
+				.title(noticeInput.getTitle())
+				.contents(noticeInput.getContents())
+				.hits(0)
+				.likes(0)
+				.regDate(LocalDateTime.now())
+				.build());
+	}
+	
+	@ExceptionHandler(DuplicatedNoticeException.class)
+	public ResponseEntity<?> handlerDuplicateNoticeException(DuplicatedNoticeException exception) {
+		return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+	} 
 	
 	@GetMapping("/api/notice/{id}")
 	public Notice getNotice(@PathVariable Long id) {
