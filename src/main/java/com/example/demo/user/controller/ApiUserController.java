@@ -12,16 +12,21 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.entity.Notice;
 import com.example.demo.entity.User;
+import com.example.demo.notice.model.NoticeResponse;
 import com.example.demo.notice.model.ResponseError;
+import com.example.demo.notice.repository.NoticeRepository;
 import com.example.demo.user.exception.UserNotFoundException;
 import com.example.demo.user.model.UserInput;
+import com.example.demo.user.model.UserResponse;
 import com.example.demo.user.model.UserUpdate;
 import com.example.demo.user.repository.UserRepository;
 
@@ -31,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 public class ApiUserController {
 	private final UserRepository userRepository;
+	private final NoticeRepository noticeRepository;
 	
 	@PostMapping("/api/user")
 	public ResponseEntity<?> addUser(@RequestBody @Valid UserInput userInput, Errors errors) {
@@ -77,4 +83,25 @@ public class ApiUserController {
 	}
 	
 	
+	@GetMapping("/api/user/{id}")
+	public UserResponse getUser(@PathVariable Long id) {
+		User user = userRepository.findById(id)
+						.orElseThrow(()-> new UserNotFoundException("사용자 정보가 없습니다."));
+		UserResponse userResponse = UserResponse.of(user);
+		
+		return userResponse;
+	}
+	
+	@GetMapping("/api/user/{id}/notice")
+	public List<NoticeResponse> userNotice(@PathVariable Long id) {
+		User user = userRepository.findById(id)
+			.orElseThrow(()-> new UserNotFoundException("사용자 정보가 없습니다."));
+	
+		List<Notice> noticeList = noticeRepository.findByUser(user);
+		List<NoticeResponse> noticeResponseList = new ArrayList<>();
+		noticeList.stream().forEach((e)->{
+			noticeResponseList.add(NoticeResponse.of(e));
+		});
+		return noticeResponseList;
+	}
 }
