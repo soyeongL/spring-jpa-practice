@@ -25,3 +25,11 @@ create table NOTICE
 	USER_ID	BIGINT,
 	constraint FK_NOTICE_USER_ID foreign key(USER_ID) references user(ID)
 );
+
+create table notice_like(
+	ID BIGINT auto_increment primary key,
+	NOTICE_ID	BIGINT,
+	USER_ID	BIGINT,
+	constraint FK_NOTICELIKE_NOTICE_ID foreign key(NOTICE_ID) references notice(ID),
+	constraint FK_NOTICELIKE_USER_ID foreign key(USER_ID) references user(ID)
+);
