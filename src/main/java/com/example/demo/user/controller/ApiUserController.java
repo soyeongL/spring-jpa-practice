@@ -2,6 +2,7 @@ package com.example.demo.user.controller;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +25,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.example.demo.entity.Notice;
 import com.example.demo.entity.NoticeLike;
 import com.example.demo.entity.User;
@@ -37,9 +40,11 @@ import com.example.demo.user.exception.UserNotFoundException;
 import com.example.demo.user.model.UserInput;
 import com.example.demo.user.model.UserInputFind;
 import com.example.demo.user.model.UserInputPassword;
+import com.example.demo.user.model.UserLogin;
 import com.example.demo.user.model.UserResponse;
 import com.example.demo.user.model.UserUpdate;
 import com.example.demo.user.repository.UserRepository;
+import com.example.demo.util.PasswordUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -237,5 +242,29 @@ public class ApiUserController {
 		
 		List<NoticeLike> noticeLikeList = noticeLikeRepository.findByUser(user);
 		return noticeLikeList;
+	}
+	
+	@PostMapping("/api/user/login")
+	public ResponseEntity<?> createToken(@RequestBody @Valid UserLogin userLogin, Errors errors) {
+		List<ResponseError> responseErrorList = new ArrayList<>();
+		if(errors.hasErrors()) {
+			errors.getAllErrors().stream().forEach((e)->{
+				responseErrorList.add(ResponseError.of((FieldError)e));
+			});
+			return new ResponseEntity<>(responseErrorList, HttpStatus.BAD_REQUEST);
+		}
+		User user = userRepository.findByEmail(userLogin.getEmail())
+				.orElseThrow(()-> new UserNotFoundException("사용자가 없습니다"));
+		if(!PasswordUtils.equalPassword(userLogin.getPassword(), user.getPassword())) {
+			throw new PasswordNotMatchException("비밀번호가 일치하지 않습니다");
+		}
+		//토큰 발행!! 
+		String token = JWT.create()
+			.withExpiresAt(new Date())
+			.withClaim("user_id", user.getId())
+			.withIssuer(user.getEmail())
+			.sign(Algorithm.HMAC512("soyeonglee".getBytes()));
+			
+		return ResponseEntity.ok().body(token);
 	}
 }
