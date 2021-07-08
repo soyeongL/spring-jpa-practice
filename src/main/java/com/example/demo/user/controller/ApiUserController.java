@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,10 +24,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.example.demo.entity.Notice;
 import com.example.demo.entity.NoticeLike;
 import com.example.demo.entity.User;
@@ -41,9 +44,11 @@ import com.example.demo.user.model.UserInput;
 import com.example.demo.user.model.UserInputFind;
 import com.example.demo.user.model.UserInputPassword;
 import com.example.demo.user.model.UserLogin;
+import com.example.demo.user.model.UserLoginToken;
 import com.example.demo.user.model.UserResponse;
 import com.example.demo.user.model.UserUpdate;
 import com.example.demo.user.repository.UserRepository;
+import com.example.demo.util.JWTUtils;
 import com.example.demo.util.PasswordUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -243,7 +248,7 @@ public class ApiUserController {
 		List<NoticeLike> noticeLikeList = noticeLikeRepository.findByUser(user);
 		return noticeLikeList;
 	}
-	
+	/*JWT 토큰 발행에 대한 내용*/
 	@PostMapping("/api/user/login")
 	public ResponseEntity<?> createToken(@RequestBody @Valid UserLogin userLogin, Errors errors) {
 		List<ResponseError> responseErrorList = new ArrayList<>();
@@ -258,13 +263,65 @@ public class ApiUserController {
 		if(!PasswordUtils.equalPassword(userLogin.getPassword(), user.getPassword())) {
 			throw new PasswordNotMatchException("비밀번호가 일치하지 않습니다");
 		}
-		//토큰 발행!! 
+		//토큰 발행!!
+		LocalDateTime expiredDateTime = LocalDateTime.now().plusMonths(1);
+		Date expiredDate= java.sql.Timestamp.valueOf(expiredDateTime);
+		
 		String token = JWT.create()
-			.withExpiresAt(new Date())
+			.withExpiresAt(expiredDate)
 			.withClaim("user_id", user.getId())
+			.withSubject(user.getUserName())
 			.withIssuer(user.getEmail())
 			.sign(Algorithm.HMAC512("soyeonglee".getBytes()));
-			
-		return ResponseEntity.ok().body(token);
+		
+		return ResponseEntity.ok().body(UserLoginToken.builder()
+				.token(token)
+				.build());
+	}
+	
+	//우오아아아아아
+	@PatchMapping("/api/user/login")
+	public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+		String token = request.getHeader("S-TOKEN");
+		String email = "";
+		try {
+			email = JWT.require(Algorithm.HMAC512("soyeonglee".getBytes()))
+					.build()
+					.verify(token)
+					.getIssuer();
+		}catch(SignatureVerificationException exception ) {
+			throw new PasswordNotMatchException("비밀번호 ??");
+		}catch(Exception e) {
+			throw new PasswordNotMatchException("토큰 발행에 실패했습니다");
+		}
+		
+		User user = userRepository.findByEmail(email)
+					.orElseThrow(()->
+						new UserNotFoundException("사용자 없어요"));
+		//토큰 발행!! 
+		LocalDateTime expiredDateTime = LocalDateTime.now().plusMonths(1);
+		Date expiredDate= java.sql.Timestamp.valueOf(expiredDateTime);
+		String newToken = JWT.create()
+				.withExpiresAt(expiredDate)
+				.withClaim("user_id", user.getId())
+				.withSubject(user.getUserName())
+				.withIssuer(user.getEmail())
+				.sign(Algorithm.HMAC512("soyeonglee".getBytes()));
+		return ResponseEntity.ok().body(UserLoginToken.builder().token(newToken).build());
+	}
+	
+	@DeleteMapping("/api/user/login")
+	public ResponseEntity<?> removeToken(@RequestHeader("S-TOKEN") String token) {
+		String email = "";
+		
+		try{
+			email = JWTUtils.getIssure(token);	
+		}catch(SignatureVerificationException e) {
+			return new ResponseEntity<>("토큰 정보가 정확하지 않습니다.", HttpStatus.BAD_REQUEST);
+		}
+		
+		//세션, 쿠키 삭제
+		//클라이언트 쿠키, 로컬스토리지, 세션 스토리지
+		return ResponseEntity.ok().build();
 	}
 }
