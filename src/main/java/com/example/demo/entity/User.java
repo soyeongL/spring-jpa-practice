@@ -11,6 +11,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.example.demo.user.model.UserStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -43,4 +45,9 @@ public class User {
 	
 	@Column
 	private LocalDateTime updateDate;
+	
+	@Column
+	private UserStatus status;
+	@Column
+	private boolean lockYn;
 }

@@ -8,7 +8,9 @@ CREATE table user(
 	PHONE VARCHAR(255),
 	REG_DATE TIMESTAMP,
 	UPDATE_DATE TIMESTAMP,
-	USER_NAME VARCHAR(255)
+	USER_NAME VARCHAR(255),
+ 	STATUS	INTEGER,
+	LOCK_YN	BOOLEAN
 );
 create table NOTICE
 (
@@ -32,4 +34,13 @@ create table notice_like(
 	USER_ID	BIGINT,
 	constraint FK_NOTICELIKE_NOTICE_ID foreign key(NOTICE_ID) references notice(ID),
 	constraint FK_NOTICELIKE_USER_ID foreign key(USER_ID) references user(ID)
+);
+
+create table user_login_history (
+	ID	BIGINT auto_increment primary key,
+	USER_ID	BIGINT,
+	EMAIL	VARCHAR(255),
+	USER_NAME	VARCHAR(255),
+	LOGIN_DATE	TIMESTAMP,
+	IP_ADDR	VARCHAR(255)
 );
