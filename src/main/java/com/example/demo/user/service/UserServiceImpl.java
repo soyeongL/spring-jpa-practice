@@ -1,7 +1,11 @@
 package com.example.demo.user.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
+import com.example.demo.entity.User;
 import com.example.demo.user.model.UserStatus;
 import com.example.demo.user.model.UserSummary;
 import com.example.demo.user.repository.UserRepository;
@@ -24,5 +28,15 @@ public class UserServiceImpl implements UserService {
 				.totalUserCount(totalUserCount)
 				.build();
 	}
+
+	@Override
+	public List<User> getTodayUsers() {
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime startDate = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(),0,0);
+		LocalDateTime endDate = startDate.plusDays(1);
+		return userRepository.findToday(startDate, endDate);
+	}
+	
+	
 	
 }
