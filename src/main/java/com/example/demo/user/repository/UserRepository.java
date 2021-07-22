@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.entity.User;
+import com.example.demo.user.model.UserNoticeCount;
 import com.example.demo.user.model.UserStatus;
 
 @Repository
@@ -22,4 +23,5 @@ public interface UserRepository extends JpaRepository< User, Long>{
 	
 	@Query(" select u from User u where u.regDate between :startDate and :endDate ")
 	List<User> findToday(LocalDateTime startDate, LocalDateTime endDate);
+	
 }
