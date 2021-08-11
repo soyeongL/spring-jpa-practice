@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 
-import com.example.demo.entity.User;
+import com.example.demo.user.entity.User;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +21,10 @@ public class ResponseMessage {
 	private Object body;
 	
 	public static ResponseMessage fail(String message) {
-		
+		return fail(message, null);
+	}
+	
+	public static ResponseMessage fail(String message, Object data) {
 		return ResponseMessage.builder()
 			.header(ResponseMessageHeader.builder()
 					.result(false)
@@ -29,7 +32,7 @@ public class ResponseMessage {
 					.message(message)
 					.status(HttpStatus.BAD_REQUEST.value())
 					.build())
-			.body(null)
+			.body(data)
 			.build();
 	}
 	
@@ -45,14 +48,6 @@ public class ResponseMessage {
 				.build();
 	}
 	public static ResponseMessage success() {
-		return ResponseMessage.builder()
-				.header(ResponseMessageHeader.builder()
-						.result(true)
-						.resultCode("")
-						.message("")
-						.status(HttpStatus.OK.value())
-						.build())
-				.body(null)
-				.build();
+		return success(null);
 	}
 }

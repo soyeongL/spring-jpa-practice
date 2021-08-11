@@ -1,6 +1,6 @@
 package com.example.demo.user.model;
 
-import com.example.demo.entity.User;
+import com.example.demo.user.entity.User;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

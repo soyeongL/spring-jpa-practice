@@ -5,7 +5,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.entity.User;
+import com.example.demo.notice.repository.NoticeLikeRepository;
+import com.example.demo.user.entity.User;
 import com.example.demo.user.model.UserLogCount;
 import com.example.demo.user.model.UserNoticeCount;
 import com.example.demo.user.model.UserStatus;
@@ -51,5 +52,11 @@ public class UserServiceImpl implements UserService {
 	public List<UserLogCount> getUserLogCount() {
 		return userCustomRepository.findUserLogCount();
 	}
+
+	@Override
+	public List<User> getLikesBestUserList() {
+		return userCustomRepository.findBestLikeUser();
+	}
+	
 	
 }

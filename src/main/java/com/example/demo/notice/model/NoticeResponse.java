@@ -2,7 +2,7 @@ package com.example.demo.notice.model;
 
 import java.time.LocalDateTime;
 
-import com.example.demo.entity.Notice;
+import com.example.demo.notice.entity.Notice;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

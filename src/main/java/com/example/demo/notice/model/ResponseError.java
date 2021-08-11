@@ -1,5 +1,8 @@
 package com.example.demo.notice.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
@@ -21,5 +24,15 @@ public class ResponseError {
 			.field(e.getField())
 			.messgae(e.getDefaultMessage())
 			.build(); 
+	}
+	
+	public static List<ResponseError> of(List<ObjectError> errors){
+		List<ResponseError> responseErrors = new ArrayList<>();
+		if(errors != null) {
+			errors.stream().forEach((e)->{
+				responseErrors.add(ResponseError.of((FieldError)e)); 
+			});
+		}
+		return responseErrors;
 	}
 }

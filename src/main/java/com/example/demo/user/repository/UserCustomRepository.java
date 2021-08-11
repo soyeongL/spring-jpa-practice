@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 
 import org.springframework.stereotype.Repository;
 
+import com.example.demo.user.entity.User;
 import com.example.demo.user.model.UserLogCount;
 import com.example.demo.user.model.UserNoticeCount;
 
@@ -28,6 +29,12 @@ public class UserCustomRepository {
 					" , (select count(*) from Notice_Like nl where nl.user_id= u.id) notice_like_count " +
 					" from User u ";
 		List<UserLogCount> list = entityManager.createNativeQuery(sql).getResultList();
+		return list;
+	}
+	
+	public List<User> findBestLikeUser(){
+		String sql = "select u.id ,u.email,u.user_name  from user u  where u.id IN (select nl.user_id from notice_like nl group by nl.user_id order by count(*) desc) limit 10";
+		List<User> list = entityManager.createNativeQuery(sql).getResultList();
 		return list;
 	}
 }

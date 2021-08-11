@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.entity.User;
-import com.example.demo.entity.UserLoginHistory;
 import com.example.demo.notice.repository.NoticeRepository;
+import com.example.demo.user.entity.User;
+import com.example.demo.user.entity.UserLoginHistory;
 import com.example.demo.user.exception.UserNotFoundException;
 import com.example.demo.user.model.ResponseMessage;
 import com.example.demo.user.model.UserLogCount;
@@ -158,5 +158,11 @@ public class ApiAdminUserController {
 	public ResponseEntity<?> userLogCount() {
 		List<UserLogCount> userLogCounts = userService.getUserLogCount();
 		return ResponseEntity.ok().body(ResponseMessage.success(userLogCounts));
+	}
+	
+	@GetMapping("/api/admin/user/likes/best")
+	public ResponseEntity<?> userLikesBest() {
+		List<User> user= userService.getLikesBestUserList();
+		return ResponseEntity.ok().body(ResponseMessage.success(user));
 	}
 }

@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.example.demo.entity.User;
+import com.example.demo.user.entity.User;
 import com.example.demo.user.model.UserNoticeCount;
 import com.example.demo.user.model.UserStatus;
 

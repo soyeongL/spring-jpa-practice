@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.entity.Notice;
+import com.example.demo.notice.entity.Notice;
 import com.example.demo.notice.exception.AlreadyDeletedException;
 import com.example.demo.notice.exception.DuplicatedNoticeException;
 import com.example.demo.notice.exception.NoticeNotFoundException;
